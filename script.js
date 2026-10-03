@@ -1,5 +1,6 @@
-// Points System
+// Global State
 let points = 0;
+let userName = localStorage.getItem('tv_learning_username') || '';
 
 function loadPoints() {
     const saved = localStorage.getItem('tv_learning_points');
@@ -30,26 +31,62 @@ function addPoints(activityKey, score, total) {
         earned += 1;
     }
 
+    const nameStr = userName ? ` ${userName}` : '';
+
     if (earned > 0) {
         points += earned;
         savePoints();
         localStorage.setItem(activityDataKey, JSON.stringify(savedData));
         
         if (earned === 2) {
-            sayMascot("Bravo ! Un sans faute ET ta première partie d'aujourd'hui ! +2 points !");
+            sayMascot(`Bravo${nameStr} ! Un sans faute ET ta première partie d'aujourd'hui ! +2 points !`);
         } else if (score === total) {
-            sayMascot("Parfait ! Un sans faute ! +1 point !");
+            sayMascot(`Parfait${nameStr} ! Un sans faute ! +1 point !`);
         } else {
-            sayMascot("Super ! Tu as gagné 1 point de participation aujourd'hui !");
+            sayMascot(`Super ! Tu as gagné 1 point de participation aujourd'hui !`);
         }
     } else {
         if (score === total) {
-            sayMascot("Encore parfait ! Tu es très fort !");
+            sayMascot(`Encore parfait${nameStr} ! Tu es très fort !`);
         } else if (score >= total / 2) {
-            sayMascot("Bien joué ! Continue de t'entraîner !");
+            sayMascot(`Bien joué${nameStr} ! Continue de t'entraîner !`);
         } else {
-            sayMascot("C'est en forgeant qu'on devient forgeron ! Tu feras mieux la prochaine fois !");
+            sayMascot(`C'est en forgeant qu'on devient forgeron ! Tu feras mieux la prochaine fois !`);
         }
+    }
+}
+
+// User Identity
+function initHome() {
+    if (!userName) {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainMenu = document.getElementById('main-menu');
+        if (welcomeScreen && mainMenu) {
+            welcomeScreen.style.display = 'block';
+            mainMenu.style.display = 'none';
+        }
+        sayMascot("Salut ! Moi c'est Red le renard. Comment t'appelles-tu ?");
+    } else {
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainMenu = document.getElementById('main-menu');
+        const displayUser = document.getElementById('display-username');
+        if (welcomeScreen && mainMenu) {
+            welcomeScreen.style.display = 'none';
+            mainMenu.style.display = 'block';
+        }
+        if (displayUser) {
+            displayUser.innerText = userName;
+        }
+        sayMascot(`Coucou ${userName} ! Choisis une activité !`);
+    }
+}
+
+function saveUsername() {
+    const input = document.getElementById('username-input');
+    if (input && input.value.trim().length > 0) {
+        userName = input.value.trim();
+        localStorage.setItem('tv_learning_username', userName);
+        initHome();
     }
 }
 
@@ -273,14 +310,24 @@ function handleAnswer(optIndex) {
     const selectedText = q.options[optIndex];
     gameState.selectedAnswer = selectedText;
     
+    const mascotContainer = document.getElementById('mascot-container');
+    mascotContainer.classList.remove('mascot-happy', 'mascot-sad');
+
     // Sometimes options can be numbers, so convert to string to compare just in case, but strict equality usually works since we generate numbers in JS.
     const isCorrect = String(selectedText) === String(q.answer);
     if (isCorrect) {
         gameState.score += 1;
         sayMascot("Bravo ! Bonne réponse !");
+        mascotContainer.classList.add('mascot-happy');
     } else {
         sayMascot(`Oups ! La bonne réponse était : ${q.answer}`);
+        mascotContainer.classList.add('mascot-sad');
     }
+
+    // Remove the state after a few seconds so it goes back to idle for the next question
+    setTimeout(() => {
+        mascotContainer.classList.remove('mascot-happy', 'mascot-sad');
+    }, 2500);
 
     renderGame();
 }

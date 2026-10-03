@@ -38,11 +38,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             ?>
         </main>
 
-        <div class="mascot-container">
+        <div class="mascot-container" id="mascot-container">
             <div id="speech-bubble" class="speech-bubble">
                 Bonjour ! Prêt à apprendre ?
             </div>
-            <img src="mascot.jpg" alt="Mascot Fox" class="mascot-image bounce-hover" />
+            <?php include "mascot.svg"; ?>
         </div>
     </div>
 
@@ -52,7 +52,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         document.addEventListener('DOMContentLoaded', () => {
             const page = "<?php echo $page; ?>";
             if (page === 'home') {
-                sayMascot("Choisis une activité ! On va bien s'amuser !");
+                initHome();
             } else if (page === 'addition') {
                 initGame('addition');
             } else if (page === 'multiplication') {

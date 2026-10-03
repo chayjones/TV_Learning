@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="mascot-image bounce-hover">
+  <defs>
+    <style>
+      .orange { fill: #ff7e00; }
+      .dark-orange { fill: #e57100; }
+      .white { fill: #ffffff; }
+      .dark { fill: #333333; }
+      
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+      
+      @keyframes blink {
+        0%, 46%, 48%, 100% { transform: scaleY(1); }
+        47% { transform: scaleY(0.1); }
+      }
+      
+      @keyframes tail-wag {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(15deg); }
+      }
+      
+      @keyframes ear-twitch-left {
+        0%, 90%, 100% { transform: rotate(0deg); }
+        95% { transform: rotate(-8deg); }
+      }
+      
+      @keyframes ear-twitch-right {
+        0%, 90%, 100% { transform: rotate(0deg); }
+        95% { transform: rotate(8deg); }
+      }
+
+      /* Happy jump */
+      @keyframes happy-jump {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-30px) scale(1.05); }
+      }
+
+      /* Sad droop */
+      @keyframes sad-droop {
+        0% { transform: translateY(0) scale(1); }
+        100% { transform: translateY(15px) scaleY(0.9); }
+      }
+
+      /* Base animations */
+      .fox-body {
+        animation: bounce 2s infinite ease-in-out;
+        transform-origin: 100px 170px;
+      }
+      .fox-tail {
+        animation: tail-wag 2s infinite ease-in-out;
+        transform-origin: 70px 140px;
+      }
+      .fox-eyes {
+        animation: blink 4s infinite linear;
+        transform-origin: 100px 90px;
+      }
+      .ear-left {
+        animation: ear-twitch-left 5s infinite linear;
+        transform-origin: 65px 65px;
+      }
+      .ear-right {
+        animation: ear-twitch-right 5.5s infinite linear;
+        transform-origin: 135px 65px;
+      }
+
+      .happy-eyes, .sad-eyes { display: none; fill: none; stroke: #333; stroke-width: 5; stroke-linecap: round; }
+
+      /* Happy State Overrides */
+      .mascot-happy .fox-body {
+        animation: happy-jump 0.6s ease-in-out infinite !important;
+      }
+      .mascot-happy .fox-eyes { display: none; }
+      .mascot-happy .happy-eyes { display: block; }
+      .mascot-happy .fox-tail { animation: tail-wag 0.5s infinite ease-in-out; }
+
+      /* Sad State Overrides */
+      .mascot-sad .fox-body {
+        animation: sad-droop 0.5s forwards !important;
+      }
+      .mascot-sad .fox-eyes { display: none; }
+      .mascot-sad .sad-eyes { display: block; }
+      .mascot-sad .ear-left { transform: rotate(-30deg) !important; animation: none !important; }
+      .mascot-sad .ear-right { transform: rotate(30deg) !important; animation: none !important; }
+      .mascot-sad .fox-tail { transform: rotate(-20deg) !important; animation: none !important; }
+    </style>
+  </defs>
+
+  <g class="fox-body">
+    <!-- Tail -->
+    <g class="fox-tail">
+      <path d="M 80,150 C 30,170 10,100 40,70 C 60,50 80,100 80,150 Z" class="orange"/>
+      <path d="M 40,70 C 25,85 30,105 45,105 C 55,105 60,85 60,85 Z" class="white"/>
+    </g>
+
+    <!-- Body -->
+    <path d="M 60,110 L 140,110 C 140,170 60,170 60,110 Z" class="orange"/>
+    <path d="M 75,120 L 125,120 C 125,160 75,160 75,120 Z" class="white"/>
+
+    <!-- Head -->
+    <!-- Left Ear -->
+    <g class="ear-left">
+      <polygon points="65,65 40,30 85,55" class="orange"/>
+      <polygon points="62,60 48,40 75,55" class="white"/>
+    </g>
+    
+    <!-- Right Ear -->
+    <g class="ear-right">
+      <polygon points="135,65 160,30 115,55" class="orange"/>
+      <polygon points="138,60 152,40 125,55" class="white"/>
+    </g>
+
+    <!-- Face Base -->
+    <rect x="50" y="55" width="100" height="70" rx="35" class="orange"/>
+    
+    <!-- White Cheeks -->
+    <circle cx="70" cy="95" r="25" class="white"/>
+    <circle cx="130" cy="95" r="25" class="white"/>
+    <polygon points="70,120 130,120 100,75" class="white"/>
+
+    <!-- Nose -->
+    <ellipse cx="100" cy="105" rx="6" ry="4" class="dark"/>
+
+    <!-- Eyes (Normal) -->
+    <g class="fox-eyes">
+      <circle cx="75" cy="85" r="5" class="dark"/>
+      <circle cx="125" cy="85" r="5" class="dark"/>
+    </g>
+
+    <!-- Eyes (Happy) -->
+    <g class="happy-eyes">
+      <path d="M 68,88 Q 75,78 82,88" />
+      <path d="M 118,88 Q 125,78 132,88" />
+    </g>
+
+    <!-- Eyes (Sad) -->
+    <g class="sad-eyes">
+      <path d="M 68,85 Q 75,80 82,85" />
+      <path d="M 118,85 Q 125,80 132,85" />
+    </g>
+    
+    <!-- Paws -->
+    <ellipse cx="75" cy="165" rx="10" ry="6" class="dark-orange"/>
+    <ellipse cx="125" cy="165" rx="10" ry="6" class="dark-orange"/>
+  </g>
+</svg>
