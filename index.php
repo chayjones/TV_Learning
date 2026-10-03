@@ -29,7 +29,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         <main class="glass-card" style="flex: 1; display: flex; flex-direction: column;">
             <?php
-            $allowed_pages = ['home', 'addition', 'multiplication', 'subtraction', 'compare_numbers', 'doubles_halves', 'geometry', 'vocabulary', 'conjugation', 'chrono_lecture'];
+            $allowed_pages = ['home', 'addition', 'multiplication', 'subtraction', 'compare_numbers', 'doubles_halves', 'geometry', 'vocabulary', 'conjugation', 'chrono_lecture', 'geography'];
             if (in_array($page, $allowed_pages)) {
                 include "pages/{$page}.php";
             } else {
@@ -46,7 +46,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="maps_data.js?v=5"></script>
+    <script src="script.js?v=4"></script>
     <script>
         // Trigger page-specific JS initializations
         document.addEventListener('DOMContentLoaded', () => {
@@ -71,6 +72,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 initGame('conjugation');
             } else if (page === 'chrono_lecture') {
                 initGame('chrono_lecture');
+            } else if (page === 'geography') {
+                initGame('geography');
             }
         });
     </script>

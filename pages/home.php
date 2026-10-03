@@ -67,4 +67,13 @@
             <p>Teste ta vitesse de lecture</p>
         </a>
     </div>
+
+    <h2 style="margin-top: 3rem; color: #666; font-size: 1.5rem;">Découverte du Monde</h2>
+    <div class="activities-grid">
+        <a href="index.php?page=geography" class="activity-card glass-card">
+            <div class="icon-wrapper" style="background: #e0f7fa;">🌍</div>
+            <h2>Géographie</h2>
+            <p>Place les pays et continents</p>
+        </a>
+    </div>
 </div>

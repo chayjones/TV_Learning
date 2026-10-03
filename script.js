@@ -111,6 +111,11 @@ let gameState = {
     selectedTable: null // 'random' or number
 };
 
+let mapState = {
+    region: null,
+    piecesLeft: 0
+};
+
 const VOCABULARY_DATA = [
     { word: "Chien", options: ["Un animal de compagnie", "Un légume", "Un moyen de transport", "Une maison"], answer: "Un animal de compagnie" },
     { word: "Voiture", options: ["Un animal", "Pour rouler", "Pour manger", "Pour voler"], answer: "Pour rouler" },
@@ -277,6 +282,13 @@ function initGame(type) {
         return;
     }
 
+    if (type === 'geography') {
+        gameState.stage = 'select_region';
+        sayMascot("Géographie ! Choisis le continent à explorer.");
+        renderGeographySelect();
+        return;
+    }
+
     if (type === 'vocabulary' || type === 'conjugation' || type === 'geometry' || type === 'compare_numbers' || type === 'doubles_halves') {
         gameState.total = 5;
     }
@@ -378,6 +390,198 @@ function finishChronoLecture() {
         <h2 style="margin-top: 1rem;">Vitesse : <span style="color: #2EC4B6;">${wpm} mots / minute</span></h2>
         <a href="index.php" class="btn btn-primary" style="margin-top: 3rem;">Retour au menu</a>
     `;
+}
+
+// ---------------- GEOGRAPHY ----------------
+function renderGeographySelect() {
+    const area = document.getElementById('game-area');
+    if (!area) return;
+    area.innerHTML = `
+        <h1>Choisis la carte à assembler</h1>
+        <div class="options-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 2rem;">
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('world')">Le Monde (Continents)</button>
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('europe')">Europe</button>
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('africa')">Afrique</button>
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('asia')">Asie</button>
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('americas')">Amériques</button>
+            <button class="btn btn-outline option-btn" onclick="startGeographyGame('oceania')">Océanie</button>
+        </div>
+    `;
+}
+
+function startGeographyGame(region) {
+    gameState.stage = 'game';
+    mapState.region = region;
+    
+    // MAP_DATA is loaded from maps_data.js in index.php
+    if (typeof MAP_DATA === 'undefined' || !MAP_DATA[region]) {
+        alert("Les données de la carte ne sont pas chargées !");
+        return;
+    }
+    const data = MAP_DATA[region];
+    const area = document.getElementById('game-area');
+    
+    area.innerHTML = `
+        <h1 style="margin-bottom: 1rem;">Carte : ${region.toUpperCase()}</h1>
+        <div style="display: flex; gap: 20px; width: 100%;">
+            <div id="map-board" style="width: 800px; height: 600px; background: #e0f7fa; border-radius: 10px; position: relative; border: 3px solid #ccc; flex-shrink: 0;">
+                <svg id="base-svg" viewBox="${data.viewBox}" width="100%" height="100%" style="position: absolute; top:0; left:0;">
+                    <g id="base-paths"></g>
+                </svg>
+            </div>
+            <div id="pieces-tray" style="flex: 1; background: #fff; padding: 20px; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; max-height: 600px; overflow-y: auto; border: 2px dashed #999;">
+            </div>
+        </div>
+    `;
+    
+    const basePaths = document.getElementById('base-paths');
+    const tray = document.getElementById('pieces-tray');
+    
+    let pieces = [...data.features];
+    pieces.sort(() => Math.random() - 0.5); // shuffle
+    if (region !== 'world') {
+        pieces = pieces.slice(0, 12);
+    }
+    mapState.piecesLeft = pieces.length;
+
+    sayMascot("Fais glisser chaque pièce sur sa forme grise correspondante sur la carte !");
+
+    // Colors for pieces
+    const colors = ['#FF9F1C', '#2EC4B6', '#E71D36', '#9B5DE5', '#F15BB5', '#00BBF9', '#38B000', '#F4A261'];
+
+    // Wait slightly to let DOM render so we can getBBox
+    setTimeout(() => {
+        // Draw full continent outline
+        if (data.outline) {
+            let outlinePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            outlinePath.setAttribute('d', data.outline);
+            outlinePath.setAttribute('fill', '#f5f5f5');
+            outlinePath.setAttribute('stroke', '#ccc');
+            outlinePath.setAttribute('stroke-width', '1');
+            basePaths.appendChild(outlinePath);
+        }
+
+        // Draw base map drop zones
+        pieces.forEach(f => {
+            let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute('d', f.d);
+            path.setAttribute('fill', '#d0d0d0');
+            path.setAttribute('stroke', '#fff');
+            path.setAttribute('stroke-width', '1');
+            path.setAttribute('id', 'base-' + f.id.replace(/\s/g, '-'));
+            
+            // Allow drop
+            path.addEventListener('dragover', (e) => e.preventDefault());
+            path.addEventListener('drop', handleMapDrop);
+            
+            basePaths.appendChild(path);
+        });
+
+        // Create draggable pieces in the tray
+        pieces.forEach(f => {
+            const baseId = 'base-' + f.id.replace(/\s/g, '-');
+            const basePath = document.getElementById(baseId);
+            const bbox = basePath.getBBox();
+            
+            // To make the tray items a nice size, we calculate a scale.
+            const TARGET_SIZE = 120;
+            const maxDim = Math.max(bbox.width, bbox.height);
+            const scale = TARGET_SIZE / Math.max(TARGET_SIZE, maxDim);
+            const w = bbox.width * scale;
+            const h = bbox.height * scale;
+            
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            let pieceDiv = document.createElement('div');
+            pieceDiv.className = 'draggable-piece glass-card';
+            pieceDiv.setAttribute('draggable', 'true');
+            pieceDiv.setAttribute('data-id', f.id);
+            pieceDiv.setAttribute('data-color', color);
+            pieceDiv.style.cursor = 'grab';
+            pieceDiv.style.padding = '5px';
+            pieceDiv.style.display = 'flex';
+            pieceDiv.style.flexDirection = 'column';
+            pieceDiv.style.alignItems = 'center';
+            pieceDiv.style.justifyContent = 'center';
+            
+            pieceDiv.innerHTML = `
+                <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #333; text-align: center;">${f.id}</div>
+                <svg viewBox="${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}" width="${w}" height="${h}" style="overflow: visible;">
+                    <path d="${f.d}" fill="${color}" stroke="#333" stroke-width="1" />
+                </svg>
+            `;
+            
+            pieceDiv.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', f.id);
+            });
+            
+            tray.appendChild(pieceDiv);
+        });
+    }, 100);
+}
+
+function handleMapDrop(e) {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('text/plain');
+    const targetId = this.getAttribute('id').replace('base-', '').replace(/-/g, ' ');
+    
+    // Notice that when we set ID we replaced spaces with dashes. So we compare:
+    if (draggedId.replace(/\s/g, '-') === this.getAttribute('id').replace('base-', '')) {
+        // Success
+        const draggedDiv = document.querySelector(`.draggable-piece[data-id="${draggedId}"]`);
+        if (!draggedDiv) return;
+        const color = draggedDiv.getAttribute('data-color');
+        
+        // Fill the path on the map
+        this.setAttribute('fill', color);
+        
+        // Add the label on the map
+        const bbox = this.getBBox();
+        let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute('x', bbox.x + bbox.width/2);
+        txt.setAttribute('y', bbox.y + bbox.height/2);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('dominant-baseline', 'middle');
+        txt.setAttribute('fill', '#fff');
+        // Font size based on bounding box
+        txt.setAttribute('font-size', Math.max(10, Math.min(24, bbox.width/5)));
+        txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('stroke', '#000');
+        txt.setAttribute('stroke-width', '0.5');
+        txt.textContent = draggedId;
+        
+        document.getElementById('base-paths').appendChild(txt);
+        
+        // Remove from tray
+        draggedDiv.remove();
+        
+        sayMascot(`Bravo ! C'est bien ${draggedId} !`);
+        const mascotContainer = document.getElementById('mascot-container');
+        if (mascotContainer) {
+            mascotContainer.classList.add('mascot-happy');
+            setTimeout(() => mascotContainer.classList.remove('mascot-happy'), 2500);
+        }
+        
+        mapState.piecesLeft--;
+        if (mapState.piecesLeft === 0) {
+            addPoints('geography', 1, 1);
+            setTimeout(() => {
+                document.getElementById('game-area').innerHTML = `
+                    <h1>Puzzle Terminé ! Magnifique !</h1>
+                    <a href="index.php" class="btn btn-primary" style="margin-top: 2rem;">Retour au menu</a>
+                `;
+                sayMascot("Superbe ! Tu connais ta géographie sur le bout des doigts !");
+            }, 3000);
+        }
+    } else {
+        // Failure
+        sayMascot(`Oups ! Ce n'est pas la bonne place pour ${draggedId}.`);
+        const mascotContainer = document.getElementById('mascot-container');
+        if (mascotContainer) {
+            mascotContainer.classList.add('mascot-sad');
+            setTimeout(() => mascotContainer.classList.remove('mascot-sad'), 2500);
+        }
+    }
 }
 
 function renderSelectTable() {
