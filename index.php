@@ -29,7 +29,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         <main class="glass-card" style="flex: 1; display: flex; flex-direction: column;">
             <?php
-            $allowed_pages = ['home', 'addition', 'multiplication', 'subtraction', 'compare_numbers', 'doubles_halves', 'geometry', 'vocabulary', 'conjugation'];
+            $allowed_pages = ['home', 'addition', 'multiplication', 'subtraction', 'compare_numbers', 'doubles_halves', 'geometry', 'vocabulary', 'conjugation', 'chrono_lecture'];
             if (in_array($page, $allowed_pages)) {
                 include "pages/{$page}.php";
             } else {
@@ -69,6 +69,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 initGame('vocabulary');
             } else if (page === 'conjugation') {
                 initGame('conjugation');
+            } else if (page === 'chrono_lecture') {
+                initGame('chrono_lecture');
             }
         });
     </script>

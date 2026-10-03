@@ -60,5 +60,11 @@
             <h2>Conjugaison</h2>
             <p>Le présent de l'indicatif</p>
         </a>
+
+        <a href="index.php?page=chrono_lecture" class="activity-card glass-card">
+            <div class="icon-wrapper french">⏱️</div>
+            <h2>Chrono Lecture</h2>
+            <p>Teste ta vitesse de lecture</p>
+        </a>
     </div>
 </div>
